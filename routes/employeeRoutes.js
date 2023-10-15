@@ -1,20 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const employeeController = require('../controllers/employeeController');
+const empController = require('../controllers/empController');
+const authenticate = require('../middlewares/auth'); // Import the authentication middleware
 
-// Get all employees
-router.get('/employees', employeeController.getAllEmployees);
-
-// Create a new employee
-router.post('/employees', employeeController.createEmployee);
-
-// Get employee by ID
-router.get('/employees/:eid', employeeController.getEmployeeById);
-
-// Update employee details by ID
-router.put('/employees/:eid', employeeController.updateEmployee);
-
-// Delete employee by ID
-router.delete('/employees', employeeController.deleteEmployee);
+router.get('/employees', authenticate, empController.getAllEmployees);
+router.post('/employees', authenticate, empController.createEmployee);
+router.get('/employees/:eid', authenticate, empController.getEmployeeById);
+router.put('/employees/:eid', authenticate, empController.updateEmployee);
+router.delete('/employees', authenticate, empController.deleteEmployee);
 
 module.exports = router;
+

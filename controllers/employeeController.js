@@ -1,93 +1,113 @@
-const Employee = require('../models/employeeModel');
+const Employee = require('../models/Employee');
 
-// Get all employees
-exports.getAllEmployees = (req, res) => {
-  // Implement logic to fetch all employees from the database
-  Employee.find({}, (err, employees) => {
-    if (err) {
-      return res.status(500).json({
-        status: false,
-        message: 'Error fetching employees',
-      });
-    }
+exports.getAllEmployees = async (req, res) => {
+  try {
+    // Retrieve all employees from the database
+    const employees = await Employee.find();
+
+    // Return the list of employees
     res.status(200).json(employees);
-  });
+  } catch (error) {
+    // Handle errors and return an error response
+    res.status(500).json({ status: false, message: 'Failed to retrieve employees' });
+  }
 };
 
-// Create a new employee
-exports.createEmployee = (req, res) => {
-  const { first_name, last_name, email, gender, salary } = req.body;
-  const newEmployee = new Employee({ first_name, last_name, email, gender, salary });
+exports.createEmployee = async (req, res) => {
+  try {
+    // Extract employee data from the request body
+    const { first_name, last_name, email, gender, salary } = req.body;
 
-  // Implement logic to save the new employee to the database
-  newEmployee.save((err, employee) => {
-    if (err) {
-      return res.status(400).json({
-        status: false,
-        message: 'Error creating employee',
-      });
-    }
-    res.status(201).json(employee);
-  });
+    // Create a new employee
+    const employee = new Employee({
+      first_name,
+      last_name,
+      email,
+      gender,
+      salary,
+    });
+
+    // Save the employee to the database
+    await employee.save();
+
+    // Return a success response
+    res.status(201).json({ status: true, message: 'Employee created successfully' });
+  } catch (error) {
+    // Handle errors and return an error response
+    res.status(500).json({ status: false, message: 'Employee creation failed' });
+  }
 };
 
-// Get employee by ID
-exports.getEmployeeById = (req, res) => {
-  const employeeId = req.params.eid;
+exports.getEmployeeById = async (req, res) => {
+  try {
+    const employeeId = req.params.eid;
 
-  // Implement logic to fetch an employee by ID from the database
-  Employee.findById(employeeId, (err, employee) => {
-    if (err) {
-      return res.status(500).json({
-        status: false,
-        message: 'Error fetching employee',
-      });
-    }
+    // Find an employee by ID
+    const employee = await Employee.findById(employeeId);
+
     if (!employee) {
-      return res.status(404).json({
-        status: false,
-        message: 'Employee not found',
-      });
+      // Return an error response for not found
+      res.status(404).json({ status: false, message: 'Employee not found' });
+    } else {
+      // Return the employee details
+      res.status(200).json(employee);
     }
-    res.status(200).json(employee);
-  });
+  } catch (error) {
+    // Handle errors and return an error response
+    res.status(500).json({ status: false, message: 'Failed to retrieve employee details' });
+  }
 };
 
-// Update employee details by ID
-exports.updateEmployee = (req, res) => {
-  const employeeId = req.params.eid;
-  const updatedData = req.body;
+exports.updateEmployee = async (req, res) => {
+  try {
+    const employeeId = req.params.eid;
 
-  // Implement logic to update employee details by ID in the database
-  Employee.findByIdAndUpdate(employeeId, updatedData, { new: true }, (err, updatedEmployee) => {
-    if (err) {
-      return res.status(500).json({
-        status: false,
-        message: 'Error updating employee',
-      });
-    }
+    // Extract updated data from the request body
+    const { first_name, last_name, email, gender, salary } = req.body;
+
+    // Find and update the employee by ID
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      employeeId,
+      {
+        first_name,
+        last_name,
+        email,
+        gender,
+        salary,
+      },
+      { new: true }
+    );
+
     if (!updatedEmployee) {
-      return res.status(404).json({
-        status: false,
-        message: 'Employee not found',
-      });
+      // Return an error response for not found
+      res.status(404).json({ status: false, message: 'Employee not found' });
+    } else {
+      // Return the updated employee details
+      res.status(200).json(updatedEmployee);
     }
-    res.status(200).json(updatedEmployee);
-  });
+  } catch (error) {
+    // Handle errors and return an error response
+    res.status(500).json({ status: false, message: 'Failed to update employee details' });
+  }
 };
 
-// Delete employee by ID
-exports.deleteEmployee = (req, res) => {
-  const employeeId = req.query.eid;
+exports.deleteEmployee = async (req, res) => {
+  try {
+    const employeeId = req.query.eid;
 
-  // Implement logic to delete an employee by ID from the database
-  Employee.findByIdAndRemove(employeeId, (err) => {
-    if (err) {
-      return res.status(500).json({
-        status: false,
-        message: 'Error deleting employee',
-      });
+    // Delete an employee by ID
+    const result = await Employee.findByIdAndRemove(employeeId);
+
+    if (!result) {
+      // Return an error response for not found
+      res.status(404).json({ status: false, message: 'Employee not found' });
+    } else {
+      // Return a success response
+      res.status(204).send();
     }
-    res.status(204).send();
-  });
+  } catch (error) {
+    // Handle errors and return an error response
+    res.status(500).json({ status: false, message: 'Failed to delete employee' });
+  }
 };
+

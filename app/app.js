@@ -1,27 +1,20 @@
 const express = require('express');
+const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken'); // Import the JWT library
 
-const app = express();
 
-// Body Parser Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-// MongoDB Connection
-mongoose.connect('mongodb://localhost/comp3123_assignment1', {
+mongoose.connect('mongodb://localhost:27017/COMP3123_Assignment1', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
+app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 3000;
+app.use('/api/v1/user', require('./routes/userRoutes'));
+app.use('/api/v1/employee', require('./routes/employeeRoutes'));
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
